@@ -85,8 +85,22 @@ As long as you pick a specific git commit from our images repo:
 
 ... the only "moving" part you have to trust is the Debian packages official repositories
 
+## List of images
+
+ * [homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
+ * [logdna logspout](https://github.com/dubo-dubon-duponey/docker-logspout)
+ * [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
+ * [roon player & roon bridge](https://github.com/dubo-dubon-duponey/docker-roon)
+ * [airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
+
+Work in progress:
+
+ * [plex](https://github.com/dubo-dubon-duponey/docker-plex)
+ * [ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
+ * [transmission](https://github.com/dubo-dubon-duponey/docker-transmission)
+
 ## Future
 
  * consider moving all dependencies to git submodules
- * aim for airgapped building past th first checkout
+ * aim for airgapped building (past obtaining the git clone)
  * investigate proxying debian repos
