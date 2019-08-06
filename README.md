@@ -60,11 +60,14 @@ All packaged softwares and their dependencies are pinned to a content addressabl
  * dependencies retrieved from casual urls are always downloaded and committed at a specific version alongside the Dockerfile - in such a case, a `refresh.sh` 
  script is provided so you can refresh them on your own
 
-The "exception" to this rule is deb packages, albeit being retrieved solely from buster repos (the current stable).
+The "exception" to this rule is deb packages, which are pinned to specific versions (not content addressable).
 
 ### Build reproducibility
 
-The above guarantees that builds are reproducible, as long as there is no security update to a debian dependency package.
+The above guarantees that builds are reproducible, as long as:
+ 
+ * the base image did not change
+ * debian packages have not been modified in place with the same versio
 
 ### Simplicity and audit-ability over fanciness
 
@@ -79,11 +82,21 @@ We do believe such issues are best dealt with by your orchestrator, or other sys
 
 As long as you pick a specific git commit from our images repo:
 
- * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `build` usually give you a thorough understanding of what's going on
- * given all dependencies are pinned (in a content addressable fashion), you do not have to trust any third-party infrastructure or distribution system
+ * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `build` gives you a thorough understanding of what's going on
+ * given all dependencies are pinned (in a content addressable fashion), you do not have to trust any third-party infrastructure or distribution mechanisms integrity
  * we only depend on two base images at runtime (buster and dubnium-buster), and three images at build time (buster, golang-1.13-buster and dubnium-buster), all of them being officially maintained by Docker
 
-... the only "moving" part you have to trust is the Debian packages official repositories
+... possible attack vectors would be:
+
+ * a compromise of Debian repositories and developpers gpg keys that would replace an existing package at a specific version with something different
+ * a compromise of Docker official images notary keys and hub account, that would replace one of the base images we depend on with something different
+ * a compromise of Debian distribution infrastructure, with a target downgrade attack pushing older (signed) versions of packages with known vulnerabilities
+
+Henceforth you still have to trust that Debian package maintainers and Docker official images team do secure their signing keys appropriately, and to a lesser extent
+that the Debian distribution infrastructure is not compromised.
+
+Of course, pinning softwares at a specific git commit does not give you guarantees that the content of it is "legit", just that it hasn't been modified after the fact.
+You still have to audit and vet the content of said software, at said specific version.
 
 ## List of images
 
@@ -93,14 +106,30 @@ As long as you pick a specific git commit from our images repo:
  * [roon player & roon bridge](https://github.com/dubo-dubon-duponey/docker-roon)
  * [airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
 
-Work in progress:
+## Future
+
+### New images
 
  * [plex](https://github.com/dubo-dubon-duponey/docker-plex)
  * [ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
- * [transmission](https://github.com/dubo-dubon-duponey/docker-transmission)
+ * [transmission with protonvpn support](https://github.com/dubo-dubon-duponey/docker-transmission)
+ * wireguard
 
-## Future
+### Fixes
 
- * consider moving all dependencies to git submodules
+ * figure out logdna
+ * upgrade to golang-1.13 release when it’s out
+
+### Enhancements
+
+ * consider moving all dependencies to git submodules instead
  * aim for airgapped building (past obtaining the git clone)
  * investigate proxying debian repos
+ * pin base images to specific sha?
+ * add tests starting images
+ * maybe everything is vpn-ed (inc. rasp)
+ * roon sometimes doesn’t get the mojo… because of airport competing?
+ * redo sound testing and convolution filters with all supported configurations, including mono
+ * finish bluetooth
+ * find a VPN solution for roon
+ 
