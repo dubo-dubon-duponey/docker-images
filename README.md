@@ -119,6 +119,8 @@ You still have to audit and vet the content of said software, at said specific v
 
  * figure out logdna
  * upgrade to golang-1.13 release when it’s out
+ * better handling of docker version detection to accomodate for future 20.x releases
+ * roon core and bridges still loose their id when a new container is started
 
 ### Enhancements
 
@@ -132,4 +134,5 @@ You still have to audit and vet the content of said software, at said specific v
  * redo sound testing and convolution filters with all supported configurations, including mono
  * finish bluetooth
  * find a VPN solution for roon
+ * switch letsencrypt back to prod
  
