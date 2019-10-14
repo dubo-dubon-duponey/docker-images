@@ -2,12 +2,13 @@
 
 > Dubo, Dubon, Duponey
 
-All our images follow four core principles:
+All our images follow five core principles:
 
  1. support multiple architectures
  1. minimize runtime footprint/size
  1. have a solid security focus
  1. keep it simple
+ 1. predictable, observable
 
 ## Multi-arch
 
@@ -15,10 +16,10 @@ We strongly recommend using (and are using ourselves) "buildx" to build and push
 
 All our images provide a simple `./build.sh` script to help you do so, with overrides for key elements of the build process (platforms selection, final image name, etc).
 
-To the extent the underlying software actually builds on it, we support arm6, arm7, arm64 and amd64.
+To the extent the underlying software actually compiles on it, we support arm6, arm7, arm64 and amd64.
 
  * arm6 is hit and miss, and is unlikely to receive much love
- * arm7 is still quite useful for Raspberry PI 3, albeit it's being superseded by arm64
+ * arm7 is still quite useful for Raspberry PI 3, albeit arm64 is preferred
 
 ## Footprint
 
@@ -29,7 +30,7 @@ As such, our live images never carry around useless (eg: build) dependencies.
 
 ### Slim base distro
 
-All of your images use Debian `buster-slim` as a base - the only exception being nodejs projects (using a `dubnium-buster` base).
+All of your images use a single base image (both for runtime and build): Debian (`buster-slim`) as a base - the only exception being nodejs projects (using a `dubnium-buster` base).
 While Alpine is certainly a very good distro and a reasonable choice, musl is still problematic in a number of cases,
 and the community size and available packages are not up-to-par with Debian.
 
@@ -41,7 +42,7 @@ Runtime dependencies are kept to the absolute minimum.
 
 ### Image integrity guarantees
 
-All our images are signed using Docker Notary and published on Docker Hub, meaning that what you get from there is exactly 
+XXXNOTTRUEYET All our images are signed using Docker Notary and published on Docker Hub, meaning that what you get from there is exactly 
 what we built, signed and pushed, and cannot be tempered with.
 Be sure to use `export DOCKER_CONTENT_TRUST=1` while pulling them.
 
@@ -53,7 +54,7 @@ As a consequence of our dependencies strategy and base distro choice.
 
 ### Dependencies pinning
 
-All packaged softwares and their dependencies are pinned to a content addressable hash:
+All third-party software and their dependencies are pinned to a content addressable hash:
 
  * git-cloned-repos are always checked out to a specific commit hash
  * yarn packages are pinned to a specific git commit, and retrieved from github instead of npm (if required, we fork them and yarn lock their dependencies)
@@ -67,7 +68,7 @@ The "exception" to this rule is deb packages, which are pinned to specific versi
 The above guarantees that builds are reproducible, as long as:
  
  * the base image did not change
- * debian packages have not been modified in place with the same versio
+ * Debian packages have not been modified in place with the same version
 
 ### Simplicity and audit-ability over fanciness
 
@@ -84,7 +85,7 @@ As long as you pick a specific git commit from our images repo:
 
  * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `build` gives you a thorough understanding of what's going on
  * given all dependencies are pinned (in a content addressable fashion), you do not have to trust any third-party infrastructure or distribution mechanisms integrity
- * we only depend on two base images at runtime (buster and dubnium-buster), and three images at build time (buster, golang-1.13-buster and dubnium-buster), all of them being officially maintained by Docker
+ * we only depend on two base images at both runtime and buildtime (buster and dubnium-buster) which are officially maintained by Docker
 
 ... possible attack vectors would be:
 
@@ -98,7 +99,29 @@ that the Debian distribution infrastructure is not compromised.
 Of course, pinning softwares at a specific git commit does not give you guarantees that the content of it is "legit", just that it hasn't been modified after the fact.
 You still have to audit and vet the content of said software, at said specific version.
 
+### Runtime security
+
+All images:
+
+ * run read-only (explicit volumes for rw - eg: /certs, /data)
+ * run as non-root (exception being Avahi daemons)
+ * run with no capabilities
+
+## Observability & predictability
+
+All images:
+
+ * log to stdout and stderr
+ * run a single process (exception for out of band ACME certificate retrieval and Avahi daemons)
+ * have a HEALTHCHECK
+ * expose a (Prometheus) metrics endpoint
+
 ## List of images
+
+ * [base](https://github.com/dubo-dubon-duponey/docker-base) (base runtime and build images, on top of Debian buster-slim)
+ * [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
+ * [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
+ * [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
 
  * [homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
  * [logdna logspout](https://github.com/dubo-dubon-duponey/docker-logspout)
@@ -113,26 +136,29 @@ You still have to audit and vet the content of said software, at said specific v
  * [plex](https://github.com/dubo-dubon-duponey/docker-plex)
  * [ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
  * [transmission with protonvpn support](https://github.com/dubo-dubon-duponey/docker-transmission)
- * wireguard
 
-### Fixes
+### Tier 1
 
- * figure out logdna
- * upgrade to golang-1.13 release when it’s out
- * better handling of docker version detection to accomodate for future 20.x releases
- * roon core and bridges still loose their id when a new container is started
+ * [TODO] finish adding healthchecks for all images
+ * [TODO] finish downgrading root for all images
+ * [TODO] better handling of docker version detection to accommodate for future 20.x releases
+ * [TODO] sign all images properly
+ * [TODO] a custom dyndns service
+ * [TODO] slimfast homebridge
+ * [BUG] roon core and bridges still loose their id when a new container is started
+ * [BUG] find a way to reuse images in cache over different builds instead of pushing everything
+ * [BUG] roon sometimes doesn’t get the mojo… because of airport competing? or because the mojo is off? polling?
+ * [BUG] redo sound testing and convolution filters with all supported configurations, including mono
 
-### Enhancements
+### Tier 2
 
- * consider moving all dependencies to git submodules instead
- * aim for airgapped building (past obtaining the git clone)
- * investigate proxying debian repos
- * pin base images to specific sha?
- * add tests starting images
- * maybe everything is vpn-ed (inc. rasp)
- * roon sometimes doesn’t get the mojo… because of airport competing?
- * redo sound testing and convolution filters with all supported configurations, including mono
- * finish bluetooth
- * find a VPN solution for roon
- * switch letsencrypt back to prod
- 
+ * [TODO] finish bluetooth
+ * [INVESTIGATE] consider moving all dependencies to git submodules instead
+ * [INVESTIGATE] investigate proxying Debian repos
+ * [INVESTIGATE] consider pinning base Debian image to a specific sha
+ * [INVESTIGATE] VPN
+    * maybe everything is vpn-ed (inc. rasp)
+    * find a VPN solution for roon
+    * wireguard or https://github.com/stellarproject/guard
+ * [INVESTIGATE] aim for air-gap building (past obtaining the git clone)
+ * [INVESTIGATE] CoreDNS: make it possible to choose HTTP-01 challenge for certificates?
