@@ -141,16 +141,20 @@ All images:
 
  * [TODO] finish adding healthchecks for all images
  * [TODO] finish downgrading root for all images
- * [TODO] better handling of docker version detection to accommodate for future 20.x releases
+ * [TODO] finish refactoring all images on top of base
  * [TODO] sign all images properly
+ * [TODO] better handling of docker version detection to accommodate for future 20.x releases
+ * [TODO] slim-fast HomeBridge
  * [TODO] a custom dyndns service
- * [TODO] slimfast homebridge
- * [BUG] roon core and bridges still loose their id when a new container is started
- * [BUG] find a way to reuse images in cache over different builds instead of pushing everything
- * [BUG] roon sometimes doesn’t get the mojo… because of airport competing? or because the mojo is off? polling?
- * [BUG] redo sound testing and convolution filters with all supported configurations, including mono
+ * [INVESTIGATE] replace HomeBridge with https://github.com/brutella/hc
 
 ### Tier 2
+
+ * [BUG] find a solution for docker UDP routing problem
+ * [BUG] find a way to reuse images in cache over different builds instead of pushing everything
+ * [BUG] roon core and bridges still loose their id when a new container is started
+ * [BUG] roon sometimes doesn’t get the mojo… because of airport competing? or because the mojo is off? polling?
+ * [BUG] redo sound testing and convolution filters with all supported configurations, including mono
 
  * [TODO] finish bluetooth
  * [INVESTIGATE] consider moving all dependencies to git submodules instead
@@ -162,3 +166,4 @@ All images:
     * wireguard or https://github.com/stellarproject/guard
  * [INVESTIGATE] aim for air-gap building (past obtaining the git clone)
  * [INVESTIGATE] CoreDNS: make it possible to choose HTTP-01 challenge for certificates?
+ * [INVESTIGATE] rethink init strategy https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/
