@@ -122,11 +122,12 @@ All images:
  * [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
  * [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
  * [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
+ * [HomeKit Alsa](https://github.com/dubo-dubon-duponey/docker-homekit-alsa)
+ * [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
 
  * [homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
  * [logdna logspout](https://github.com/dubo-dubon-duponey/docker-logspout)
  * [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
- * [roon player & roon bridge](https://github.com/dubo-dubon-duponey/docker-roon)
  * [airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
 
 ## Future
@@ -146,7 +147,13 @@ All images:
  * [TODO] better handling of docker version detection to accommodate for future 20.x releases
  * [TODO] slim-fast HomeBridge
  * [TODO] a custom dyndns service
- * [INVESTIGATE] replace HomeBridge with https://github.com/brutella/hc
+ * [INVESTIGATE] replace HomeBridge with https://github.com/brutella/hc (also look at https://www.npmjs.com/package/homebridge-http-base)
+
+ * [HOMEBRIDGE] any armv7 image is broken when it comes to certificates - introduce a hack to either:
+    * build the base-runtime image natively
+    * or re-install ca-certificates on first-run at runtime
+ * [HOMEBRIDGE] weather plus is busted
+ * [HOMEBRIDGE] sound controls are all busted (devices perms?)
 
 ### Tier 2
 
