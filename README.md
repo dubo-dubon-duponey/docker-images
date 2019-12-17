@@ -30,7 +30,7 @@ As such, our live images never carry around useless (eg: build) dependencies.
 
 ### Slim base distro
 
-All of your images use a single base image (both for runtime and build): Debian (`buster-slim`) as a base - the only exception being nodejs projects (using a `dubnium-buster` base).
+All of your images use a single base image (both for runtime and build), based on our debootstrapped version of Debian Buster.
 While Alpine is certainly a very good distro and a reasonable choice, musl is still problematic in a number of cases,
 and the community size and available packages are not up-to-par with Debian.
 
@@ -44,9 +44,10 @@ Runtime dependencies are kept to the absolute minimum.
 
 XXXNOTTRUEYET All our images are signed using Docker Notary and published on Docker Hub, meaning that what you get from there is exactly 
 what we built, signed and pushed, and cannot be tempered with.
+
 Be sure to use `export DOCKER_CONTENT_TRUST=1` while pulling them.
 
-Our build script also enforce `DOCKER_CONTENT_TRUST`, extending this guarantee to the base images at build time.
+Our build script also enforce `DOCKER_CONTENT_TRUST`, extending this guarantee to our base images at build time.
 
 ### Reduced attack surface
 
@@ -65,10 +66,7 @@ The "exception" to this rule is deb packages, which are pinned to specific versi
 
 ### Build reproducibility
 
-The above guarantees that builds are reproducible, as long as:
- 
- * the base image did not change
- * Debian packages have not been modified in place with the same version
+The above guarantees that builds are reproducible.
 
 ### Simplicity and audit-ability over fanciness
 
@@ -85,16 +83,14 @@ As long as you pick a specific git commit from our images repo:
 
  * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `build` gives you a thorough understanding of what's going on
  * given all dependencies are pinned (in a content addressable fashion), you do not have to trust any third-party infrastructure or distribution mechanisms integrity
- * we only depend on two base images at both runtime and buildtime (buster and dubnium-buster) which are officially maintained by Docker
+ * we only depend on our own base image for both runtime and buildtime which you can rebuild yourself would you like it to
 
 ... possible attack vectors would be:
 
- * a compromise of Debian repositories and developpers gpg keys that would replace an existing package at a specific version with something different
- * a compromise of Docker official images notary keys and hub account, that would replace one of the base images we depend on with something different
- * a compromise of Debian distribution infrastructure, with a target downgrade attack pushing older (signed) versions of packages with known vulnerabilities
+ * a compromise of snapshot.debian.org, from which our base image is built
+ * a compromise of Debian repositories and developpers gpg keys that would replace an existing package at a specific version with something different, and that would make its way into snapshot.debian.org
 
-Henceforth you still have to trust that Debian package maintainers and Docker official images team do secure their signing keys appropriately, and to a lesser extent
-that the Debian distribution infrastructure is not compromised.
+Henceforth you still have to trust that Debian snapshot maintainers (and overall package maintainers) secure their signing keys appropriately.
 
 Of course, pinning softwares at a specific git commit does not give you guarantees that the content of it is "legit", just that it hasn't been modified after the fact.
 You still have to audit and vet the content of said software, at said specific version.
@@ -103,40 +99,41 @@ You still have to audit and vet the content of said software, at said specific v
 
 All images:
 
- * run read-only (explicit volumes for rw - eg: /certs, /data)
- * run as non-root (exception being Avahi daemons)
+ * run read-only (with explicit volumes for read-write access - eg: /certs, /data)
+ * run as non-root (in some cases, downgrading at runtime through chroot)
  * run with no capabilities
 
 ## Observability & predictability
 
-All images:
+All images thrive at:
 
  * log to stdout and stderr
  * run a single process (exception for out of band ACME certificate retrieval and Avahi daemons)
- * have a HEALTHCHECK
- * expose a (Prometheus) metrics endpoint
+ * have a HEALTHCHECK (some exceptions)
+ * expose a (Prometheus) metrics endpoint (some exceptions)
 
 ## List of images
 
- * [base](https://github.com/dubo-dubon-duponey/docker-base) (base runtime and build images, on top of Debian buster-slim)
+ * [base](https://github.com/dubo-dubon-duponey/docker-base) (base runtime and build images, on top of our Debian image)
  * [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
  * [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
+ * [Elastic](https://github.com/dubo-dubon-duponey/docker-elastic)
  * [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
+ * [Homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
  * [HomeKit Alsa](https://github.com/dubo-dubon-duponey/docker-homekit-alsa)
- * [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
-
- * [homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
- * [logdna logspout](https://github.com/dubo-dubon-duponey/docker-logspout)
+ * [Kibana](https://github.com/dubo-dubon-duponey/docker-kibana)
+ * [Librespot](https://github.com/dubo-dubon-duponey/docker-librespot)
  * [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
- * [airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
+ * [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
+ * [Airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
 
 ## Future
 
 ### New images
 
- * [plex](https://github.com/dubo-dubon-duponey/docker-plex)
- * [ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
- * [transmission with protonvpn support](https://github.com/dubo-dubon-duponey/docker-transmission)
+ * [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
+ * [Ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
+ * [Transmission with protonvpn support](https://github.com/dubo-dubon-duponey/docker-transmission)
 
 ### Tier 1
 
@@ -153,7 +150,6 @@ All images:
     * build the base-runtime image natively
     * or re-install ca-certificates on first-run at runtime
  * [HOMEBRIDGE] weather plus is busted
- * [HOMEBRIDGE] sound controls are all busted (devices perms?)
 
 ### Tier 2
 
