@@ -1,6 +1,6 @@
 # Docker Images
 
-> Dubo, Dubon, Duponey
+> Dubo, Dubon, Duponey - Desimages
 
 All our images follow five core principles:
 
@@ -12,14 +12,16 @@ All our images follow five core principles:
 
 ## Multi-arch
 
-We strongly recommend using (and are using ourselves) "buildx" to build and push multi-architecture versions of our images.
+Our build system relies on cue, buildctl, qemu and buildkit.
 
-All our images provide a simple `./build.sh` script to help you do so, with overrides for key elements of the build process (platforms selection, final image name, etc).
+To the largest possible extent, we do leverage cross-compilation (qemu is unstable in that context).
 
-To the extent the underlying software actually compiles on it, we support arm6, arm7, arm64 and amd64.
+All our images provide a simple `./hack/build.sh` script to help you do so, with overrides for key elements of the build process (platforms selection, final image name, etc).
 
- * arm6 is hit and miss, and is unlikely to receive much love
- * arm7 is still quite useful for Raspberry PI 3, albeit arm64 is preferred
+To the extent the underlying software actually compiles on it, we support arm6, arm7, arm64, 386, amd64, s390x and pcc64le.
+
+That being said:
+ * arm6, s390x, ppc64le, 386 are largely unused by us, and unlikely to receive much love beside fixing the build
 
 ## Footprint
 
@@ -30,7 +32,8 @@ As such, our live images never carry around useless (eg: build) dependencies.
 
 ### Slim base distro
 
-All of your images use a single base image (both for runtime and build), based on our debootstrapped version of Debian Buster.
+All of your images use a single base image (both for runtime and build), based on our debootstrapped version of Debian Bullseye.
+
 While Alpine is certainly a very good distro and a reasonable choice, musl is still problematic in a number of cases,
 and the community size and available packages are not up-to-par with Debian.
 
@@ -39,15 +42,6 @@ and the community size and available packages are not up-to-par with Debian.
 Runtime dependencies are kept to the absolute minimum.
 
 ## Security 
-
-### Image integrity guarantees
-
-XXXNOTTRUEYET All our images are signed using Docker Notary and published on Docker Hub, meaning that what you get from there is exactly 
-what we built, signed and pushed, and cannot be tempered with.
-
-Be sure to use `export DOCKER_CONTENT_TRUST=1` while pulling them.
-
-Our build script also enforce `DOCKER_CONTENT_TRUST`, extending this guarantee to our base images at build time.
 
 ### Reduced attack surface
 
@@ -62,7 +56,7 @@ All third-party software and their dependencies are pinned to a content addressa
  * dependencies retrieved from casual urls are always downloaded and committed at a specific version alongside the Dockerfile - in such a case, a `refresh.sh` 
  script is provided so you can refresh them on your own
 
-The "exception" to this rule is deb packages, which are pinned to specific versions (not content addressable).
+The "exception" to this rule is debian packages, which are pinned to specific versions (not content addressable).
 
 ### Build reproducibility
 
@@ -81,7 +75,7 @@ We do believe such issues are best dealt with by your orchestrator, or other sys
 
 As long as you pick a specific git commit from our images repo:
 
- * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `build` gives you a thorough understanding of what's going on
+ * our images are straightforward to audit: looking at `Dockerfile`, `entrypoint` and `hack` files gives you a thorough understanding of what's going on
  * given all dependencies are pinned (in a content addressable fashion), you do not have to trust any third-party infrastructure or distribution mechanisms integrity
  * we only depend on our own base image for both runtime and buildtime which you can rebuild yourself would you like it to
 
@@ -97,7 +91,7 @@ You still have to audit and vet the content of said software, at said specific v
 
 ### Runtime security
 
-All images:
+All images aim for:
 
  * run read-only (with explicit volumes for read-write access - eg: /certs, /data)
  * run as non-root (in some cases, downgrading at runtime through chroot)
@@ -108,65 +102,46 @@ All images:
 All images thrive at:
 
  * log to stdout and stderr
- * run a single process (exception for out of band ACME certificate retrieval and Avahi daemons)
+ * run a single process (exception for out of band ACME certificate retrieval and mDNS broadcasters)
  * have a HEALTHCHECK (some exceptions)
  * expose a (Prometheus) metrics endpoint (some exceptions)
 
 ## List of images
 
- * [base](https://github.com/dubo-dubon-duponey/docker-base) (base runtime and build images, on top of our Debian image)
- * [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
- * [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
- * [Elastic](https://github.com/dubo-dubon-duponey/docker-elastic)
- * [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
- * [Homebridge server and a few plugins](https://github.com/dubo-dubon-duponey/docker-homebridge)
- * [HomeKit Alsa](https://github.com/dubo-dubon-duponey/docker-homekit-alsa)
- * [Kibana](https://github.com/dubo-dubon-duponey/docker-kibana)
- * [Librespot](https://github.com/dubo-dubon-duponey/docker-librespot)
- * [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
- * [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
- * [Airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
+Base:
+* [debian](https://github.com/dubo-dubon-duponey/docker-debian) (base debian image, debootstrapped from Debian repos)
+* [base](https://github.com/dubo-dubon-duponey/docker-base) (base runtime and build images, on top of our Debian image)
+* [tools](https://github.com/dubo-dubon-duponey/docker-tools)
 
-## Future
+Tooling:
+* [Athens go proxy](https://github.com/dubo-dubon-duponey/docker-goproxy)
+* [Docker registry](https://github.com/dubo-dubon-duponey/docker-registry)
+* [Buildkit](https://github.com/dubo-dubon-duponey/docker-buildkit)
+* [Apt Utils](https://github.com/dubo-dubon-duponey/docker-aptutil)
+* [Aptly](https://github.com/dubo-dubon-duponey/docker-aptly)
 
-### New images
+Infrastructure:
+* [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
+* [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
+* [Elastic](https://github.com/dubo-dubon-duponey/docker-elastic)
+* [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
+* [Kibana](https://github.com/dubo-dubon-duponey/docker-kibana)
+* [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
 
- * [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
- * [Ombi](https://github.com/dubo-dubon-duponey/docker-ombi)
- * [Transmission with protonvpn support](https://github.com/dubo-dubon-duponey/docker-transmission)
+Home and media:
+* [HomeKit Alsa](https://github.com/dubo-dubon-duponey/docker-homekit-alsa)
+* [HomeKit Wiz](https://github.com/dubo-dubon-duponey/docker-homekit-wiz)
+* [Librespot](https://github.com/dubo-dubon-duponey/docker-librespot)
+* [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
+* [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
+* [Airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
 
-### Tier 1
 
- * [TODO] finish adding healthchecks for all images
- * [TODO] finish downgrading root for all images
- * [TODO] finish refactoring all images on top of base
- * [TODO] sign all images properly
- * [TODO] better handling of docker version detection to accommodate for future 20.x releases
- * [TODO] slim-fast HomeBridge
- * [TODO] a custom dyndns service
- * [INVESTIGATE] replace HomeBridge with https://github.com/brutella/hc (also look at https://www.npmjs.com/package/homebridge-http-base)
-
- * [HOMEBRIDGE] any armv7 image is broken when it comes to certificates - introduce a hack to either:
-    * build the base-runtime image natively
-    * or re-install ca-certificates on first-run at runtime
- * [HOMEBRIDGE] weather plus is busted
-
-### Tier 2
-
- * [BUG] find a solution for docker UDP routing problem
- * [BUG] find a way to reuse images in cache over different builds instead of pushing everything
- * [BUG] roon core and bridges still loose their id when a new container is started
- * [BUG] roon sometimes doesn’t get the mojo… because of airport competing? or because the mojo is off? polling?
- * [BUG] redo sound testing and convolution filters with all supported configurations, including mono
-
- * [TODO] finish bluetooth
- * [INVESTIGATE] consider moving all dependencies to git submodules instead
- * [INVESTIGATE] investigate proxying Debian repos
- * [INVESTIGATE] consider pinning base Debian image to a specific sha
- * [INVESTIGATE] VPN
-    * maybe everything is vpn-ed (inc. rasp)
-    * find a VPN solution for roon
-    * wireguard or https://github.com/stellarproject/guard
- * [INVESTIGATE] aim for air-gap building (past obtaining the git clone)
- * [INVESTIGATE] CoreDNS: make it possible to choose HTTP-01 challenge for certificates?
- * [INVESTIGATE] rethink init strategy https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/
+Under development:
+* [Samba](https://github.com/dubo-dubon-duponey/docker-samba)
+* [Snapcast](https://github.com/dubo-dubon-duponey/docker-snapcast)
+* [Mongo](https://github.com/dubo-dubon-duponey/docker-mongo)
+* [Parse](https://github.com/dubo-dubon-duponey/docker-parse)
+* [Postgres](https://github.com/dubo-dubon-duponey/docker-postgres)
+* [Rudder](https://github.com/dubo-dubon-duponey/docker-rudder)
+* [Rudder-transformer](https://github.com/dubo-dubon-duponey/docker-rudder-transformer)
