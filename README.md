@@ -134,7 +134,7 @@ Home and media:
 * [Librespot](https://github.com/dubo-dubon-duponey/docker-librespot)
 * [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
 * [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
-* [Airport receiver](https://github.com/dubo-dubon-duponey/docker-shairport-sync)
+* [Airplay receiver](https://github.com/dubo-dubon-duponey/docker-airplay)
 
 
 Under development:

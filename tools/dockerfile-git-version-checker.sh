@@ -113,7 +113,7 @@ url::git_no_v(){
 }
 
 dock="$1"
-packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep "ENV           GIT_" | sed -E 's/.+GIT_(.*)/\1/g')" || {
+packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep "ARG           GIT_" | sed -E 's/.+GIT_(.*)/\1/g')" || {
   >&2 printf "Nothing in this dockerfile... Move along\n"
   exit
 }
