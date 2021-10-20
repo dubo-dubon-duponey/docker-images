@@ -155,7 +155,6 @@ while read -r line; do
         }
         echo "GIT_COMMIT=$newcommit"
       fi
-      }
     else
       newcommit="$(curl --proto '=https' --tlsv1.2 -sSfL "https://$repo"  | grep "commit\/" | grep fragment | sed -E "s/.+([0-9a-f]{40}).+/\1/")" || {
         tput setaf 1
