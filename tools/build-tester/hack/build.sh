@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
+# Get our root
 # shellcheck source=/dev/null
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/../"
-readonly root
-
-# shellcheck source=/dev/null
-BIN_LOCATION="${BIN_LOCATION:-$root/cache/bin}" . "$root/hack/helpers/install-tools.sh"
-
-rm -f "$root/cache/buildctl.trace.json"
 
 # Build the cue invocation
 params=(cue)
@@ -24,7 +19,7 @@ case "${1:-}" in
   *)
     cd "$root"
     target=image
-    files=("$root/hack/recipe.cue" "$root/hack/helpers/cue_tool.cue")
+    files=("$root/hack/recipe.cue" "$root/hack/cue_tool.cue")
     isparam=
     for i in "$@"; do
       if [ "${i:0:2}" == "--" ]; then

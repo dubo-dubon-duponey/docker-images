@@ -1,0 +1,8 @@
+FROM    debian as base
+
+RUN     apt-get update -qq; apt-get install -qq curl=7.88.1-10+deb12u5
+WORKDIR /opt
+COPY    . .
+
+FROM    base
+RUN     ./mtls-test.sh; exit 1

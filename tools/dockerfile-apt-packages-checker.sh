@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-SUITE=bullseye
-DATE="${DATE:-2021-10-15}"
+SUITE=bookworm
+# bullseye
+DATE="${DATE:-2024-02-20}"
 dock="$1"
 
 echo "Starting processing of dockerfile $dock"
 
-packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep -E "apt-get install ([-][^ ]+[ ]+)*([^-.;&][^;&]+)" | sed -E 's/.*apt-get install ([-][^ ]+[ ]+)*([^-.;&][^;&]+).*/\2/g' || true)"
+#packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep -E "apt-get install ([-][^ ]+[ ]+)*([^-.;&][^;&]+)" | sed -E 's/.*apt-get install ([-][^ ]+[ ]+)*([^-.;&][^;&]+).*/\2/g' || true)"
+#echo "got packages:"
+
+packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep -E "apt-get install ([-][^ ]+[ ]+)*([^-.;&][^;&]+)" | sed -E 's/apt-get install ([-][^ ]+[ ]+)*/\napt-get install /g' | grep -E "apt-get install " \
+  | sed -E 's/^apt-get install ([^-.;&][^;&]+).*/\1/g' | gsed -z 's/\n/ /g' || true)"
 
 [ "$packages" ] || {
   >&2 echo "No packages found in this dockerfile. Exiting."
@@ -19,8 +24,13 @@ packages="$(cat "$dock" | grep -Ev "^#" | gsed ':a;N;$!ba;s/\\\n/ /g' | grep -E 
 names=()
 available=()
 
+#  --add-host snapshot.debian.org:10.0.4.101
 docker inspect "dubo-analyze-$SUITE-$DATE" 1>/dev/null 2>&1 || {
-	docker run --rm --name "dubo-analyze-$SUITE-$DATE" -d -ti registry.local/dubo-dubon-duponey/debian:$SUITE-$DATE bash
+	docker run --rm --name "dubo-analyze-$SUITE-$DATE" -d -ti \
+    docker.io/dubodubonduponey/debian:$SUITE-$DATE bash
+#	docker run --rm --name "dubo-analyze-$SUITE-$DATE" -d -ti \
+#	  --add-host snapshot.debian.org:10.0.4.101 \
+#    docker.io/dubodubonduponey/debian:$SUITE-$DATE bash
 	docker exec "dubo-analyze-$SUITE-$DATE" dpkg --add-architecture amd64
 	docker exec "dubo-analyze-$SUITE-$DATE" apt-get update -o "Acquire::Check-Valid-Until=no"
 }
@@ -36,7 +46,8 @@ for i in $packages; do
 	name="$(printf "%s" "$name" | sed -E 's/(["]?[$][a-zA-Z_]+["]?)/amd64/')"
 	version="$(printf "%s" "$version" | sed -E 's/(["]?[$][a-zA-Z_]+["]?)/amd64/')"
 
-	newversion="$(docker exec "dubo-analyze-$SUITE-$DATE" apt-cache show "$name" | grep "Version:")" || {
+#	newversion="$(docker exec "dubo-analyze-$SUITE-$DATE" apt-cache show "$name" | grep "Version:")" || {
+	newversion="$(docker exec "dubo-analyze-$SUITE-$DATE" apt show "$name" 2>/dev/null | grep "Version:")" || {
 		tput setaf 2
 		echo "Ignoring dramatic failure on package $name version $version"
 		tput op

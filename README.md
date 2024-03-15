@@ -1,10 +1,9 @@
 # Docker Images
 
-> Dubo, Dubon, Duponey - Desimages
-
 All our images follow five core principles:
 
  1. support multiple architectures
+ 1. cross-build rather than leveraging qemu
  1. minimize runtime footprint/size
  1. have a solid security focus
  1. keep it simple
@@ -12,16 +11,13 @@ All our images follow five core principles:
 
 ## Multi-arch
 
-Our build system relies on cue, buildctl, qemu and buildkit.
+Our build system relies on cue, buildctl, and buildkit (and qemu).
 
-To the largest possible extent, we do leverage cross-compilation (qemu is unstable in that context).
+To the largest possible extent, we do leverage cross-compilation.
 
 All our images provide a simple `./hack/build.sh` script to help you do so, with overrides for key elements of the build process (platforms selection, final image name, etc).
 
-To the extent the underlying software actually compiles on it, we support arm6, arm7, arm64, 386, amd64, s390x and pcc64le.
-
-That being said:
- * arm6, s390x, ppc64le, 386 are largely unused by us, and unlikely to receive much love beside fixing the build
+To the extent the underlying software actually compiles on it, we support arm64 and amd64.
 
 ## Footprint
 
@@ -32,10 +28,10 @@ As such, our live images never carry around useless (eg: build) dependencies.
 
 ### Slim base distro
 
-All of your images use a single base image (both for runtime and build), based on our debootstrapped version of Debian Bullseye.
+All of your images use a single base image (both for runtime and build), based on our debootstrapped version of Debian Bookworm.
 
-While Alpine is certainly a very good distro and a reasonable choice, musl is still problematic in a number of cases,
-and the community size and available packages are not up-to-par with Debian.
+While Alpine is certainly a very good distro and a reasonable choice, musl is still problematic in a number of cases
+(specifically wrt NSS/mDNS) and the community size and available packages are not up-to-par with Debian.
 
 ### Dependencies
 
@@ -114,34 +110,41 @@ Base:
 * [tools](https://github.com/dubo-dubon-duponey/docker-tools)
 
 Tooling:
-* [Athens go proxy](https://github.com/dubo-dubon-duponey/docker-goproxy)
-* [Docker registry](https://github.com/dubo-dubon-duponey/docker-registry)
 * [Buildkit](https://github.com/dubo-dubon-duponey/docker-buildkit)
-* [Apt Utils](https://github.com/dubo-dubon-duponey/docker-aptutil)
-* [Aptly](https://github.com/dubo-dubon-duponey/docker-aptly)
+* [Go Proxy](https://github.com/dubo-dubon-duponey/docker-go-proxy)
+* [Registry](https://github.com/dubo-dubon-duponey/docker-registry)
 
 Infrastructure:
-* [Caddy](https://github.com/dubo-dubon-duponey/docker-caddy)
-* [CoreDNS](https://github.com/dubo-dubon-duponey/docker-coredns)
+* [CUPS](https://github.com/dubo-dubon-duponey/docker-cups)
+* [CoreDNS](https://github.com/dubo-dubon-duponey/docker-dns)
+* [PKI](https://github.com/dubo-dubon-duponey/docker-pki)
+* [HTTP Router](https://github.com/dubo-dubon-duponey/docker-router)
+* [Samba](https://github.com/dubo-dubon-duponey/docker-samba)
+
+
+Home and media:
+* [Airplay](https://github.com/dubo-dubon-duponey/docker-airplay)
+* [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
+* [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
+* [Spotify](https://github.com/dubo-dubon-duponey/docker-spotify)
+
+
+Experimental:
+* [Snapcast](https://github.com/dubo-dubon-duponey/docker-snapcast)
+* [MariaDB](https://github.com/dubo-dubon-duponey/docker-nariadb)
+* [Mongo](https://github.com/dubo-dubon-duponey/docker-mongo)
+* [Parse](https://github.com/dubo-dubon-duponey/docker-parse)
+* [Postgres](https://github.com/dubo-dubon-duponey/docker-postgres)
+* [Parse](https://github.com/dubo-dubon-duponey/docker-parse)
+* [Rudder](https://github.com/dubo-dubon-duponey/docker-rudder)
+* [Rudder-transformer](https://github.com/dubo-dubon-duponey/docker-rudder-transformer)
+
+Experimental and/or deprecated:
 * [Elastic](https://github.com/dubo-dubon-duponey/docker-elastic)
 * [FileBeat](https://github.com/dubo-dubon-duponey/docker-filebeat)
 * [Kibana](https://github.com/dubo-dubon-duponey/docker-kibana)
 * [AFP/timemachine server](https://github.com/dubo-dubon-duponey/docker-netatalk)
-
-Home and media:
+* [Apt Utils](https://github.com/dubo-dubon-duponey/docker-aptutil)
+* [Aptly](https://github.com/dubo-dubon-duponey/docker-aptly)
 * [HomeKit Alsa](https://github.com/dubo-dubon-duponey/docker-homekit-alsa)
 * [HomeKit Wiz](https://github.com/dubo-dubon-duponey/docker-homekit-wiz)
-* [Librespot](https://github.com/dubo-dubon-duponey/docker-librespot)
-* [Plex](https://github.com/dubo-dubon-duponey/docker-plex)
-* [Roon Server & Roon Bridge](https://github.com/dubo-dubon-duponey/docker-roon)
-* [Airplay receiver](https://github.com/dubo-dubon-duponey/docker-airplay)
-
-
-Under development:
-* [Samba](https://github.com/dubo-dubon-duponey/docker-samba)
-* [Snapcast](https://github.com/dubo-dubon-duponey/docker-snapcast)
-* [Mongo](https://github.com/dubo-dubon-duponey/docker-mongo)
-* [Parse](https://github.com/dubo-dubon-duponey/docker-parse)
-* [Postgres](https://github.com/dubo-dubon-duponey/docker-postgres)
-* [Rudder](https://github.com/dubo-dubon-duponey/docker-rudder)
-* [Rudder-transformer](https://github.com/dubo-dubon-duponey/docker-rudder-transformer)

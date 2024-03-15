@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
+# XXX this should die - parsing html is just too brittle
 #############################################################
 # Version detectors
 #############################################################
@@ -145,7 +146,7 @@ while read -r line; do
         echo "GIT_COMMIT=$commit"
         tput op
         tput setaf 2
-        newcommit="$(curl --proto '=https' --tlsv1.2 -sSfL "$("$checker" "$repo" "$newversion" | sed "s/tree/commits/")" | grep "?after=" | sed -E "s/.+([0-9a-f]{40}).+/\1/")"
+        newcommit="$(curl --proto '=https' --tlsv1.2 -sSfL "$("$checker" "$repo" "$newversion" | sed "s/tree/commits/")" | tee debug.html | grep "?after=" | sed -E "s/.+([0-9a-f]{40}).+/\1/")"
         echo "GIT_REPO=$repo"
         # XXX do not swallow up a possibly v that was there - generally should be smarter and just allow any syntax and find out which it is from github
         [ "$checker" == "url::git" ] && {
@@ -156,7 +157,7 @@ while read -r line; do
         echo "GIT_COMMIT=$newcommit"
       fi
     else
-      newcommit="$(curl --proto '=https' --tlsv1.2 -sSfL "https://$repo"  | grep "commit\/" | grep fragment | sed -E "s/.+([0-9a-f]{40}).+/\1/")" || {
+      newcommit="$(curl --proto '=https' --tlsv1.2 -sSfL "https://$repo"  | grep "commit" | grep fragment | sed -E "s/.+([0-9a-f]{40}).+/\1/")" || {
         tput setaf 1
         >&2 printf "Something very wrong here. Ignoring.\n"
         tput op
