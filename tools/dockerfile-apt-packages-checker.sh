@@ -3,7 +3,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 SUITE=bookworm
 # bullseye
-DATE="${DATE:-2024-02-20}"
+DATE="${DATE:-2024-03-01}"
 dock="$1"
 
 echo "Starting processing of dockerfile $dock"
