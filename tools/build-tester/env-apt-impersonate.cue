@@ -92,26 +92,11 @@ UserDefined: scullery.#Icing & {
 			// Proxy scenario
 			//proxy: "https://apt-proxy.local"
 			//sources: #"""
-			//# Bullseye circa June 1st 2021
-			//deb http://snapshot.debian.org/archive/debian/20210701T000000Z bullseye main
-			//deb http://snapshot.debian.org/archive/debian-security/20210701T000000Z bullseye-security main
-			//deb http://snapshot.debian.org/archive/debian/20210701T000000Z bullseye-updates main
-
 			//"""#
 
 			// This is problematic - it does impact debian debootstrap, which is pinned at 07-01
 			// We should really get done with this, once we have apt-front serving http redirects?
 			sources: #"""
-			# Bullseye circa June 1st 2021
-			deb https://snapshot.debian.org/archive/debian/20210801T000000Z bullseye main
-			deb https://snapshot.debian.org/archive/debian-security/20210801T000000Z bullseye-security main
-			deb https://snapshot.debian.org/archive/debian/20210801T000000Z bullseye-updates main
-
-			# Cannot work with the proxy
-			#deb https://apt-mirror.local/archive/bullseye/20210701T000000Z bullseye main
-			#deb https://apt-mirror.local/archive/bullseye-updates/20210701T000000Z bullseye-updates main
-			#deb https://apt-mirror.local/archive/bullseye-security/20210701T000000Z bullseye-security main
-
 			"""#
 			check_valid: false
 		}
