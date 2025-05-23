@@ -3,7 +3,7 @@
 All our images follow five core principles:
 
  1. support multiple architectures
- 1. cross-build rather than leveraging qemu
+ 1. cross-build rather than leveraging emulation
  1. minimize runtime footprint/size
  1. have a solid security focus
  1. keep it simple
@@ -89,7 +89,7 @@ You still have to audit and vet the content of said software, at said specific v
 
 All images aim for:
 
- * run read-only (with explicit volumes for read-write access - eg: /certs, /data)
+ * run read-only (with explicit volumes for read-write access - eg: certificates, user data)
  * run as non-root (in some cases, downgrading at runtime through chroot)
  * run with no capabilities
 

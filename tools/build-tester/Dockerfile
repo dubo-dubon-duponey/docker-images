@@ -29,7 +29,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && apt-get install -qq --no-install-recommends \
-                curl=7.88.1-10+deb12u5
+                curl=7.88.1-10+deb12u12
 
 RUN           --mount=type=secret,id=CA \
               --mount=type=secret,id=CERTIFICATE \

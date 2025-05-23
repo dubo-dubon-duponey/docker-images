@@ -1,6 +1,6 @@
 FROM    debian as base
 
-RUN     apt-get update -qq; apt-get install -qq curl=7.88.1-10+deb12u5
+RUN     apt-get update -qq; apt-get install -qq curl=7.88.1-10+deb12u12
 WORKDIR /opt
 COPY    . .
 

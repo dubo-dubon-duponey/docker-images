@@ -3,7 +3,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 export BIN_LOCATION="${BIN_LOCATION:-$HOME/Dubo/bin}"
 export SUITE=bookworm
-export DATE=2024-03-01
+export DATE=2025-05-01
 
 export PATH="$BIN_LOCATION:$PATH"
 readonly IMAGE_TOOLS="${IMAGE_TOOLS:-dubodubonduponey/tools:$(uname | grep -q Darwin && printf "macos" || printf "linux")-$SUITE-$DATE}"
@@ -19,10 +19,9 @@ setup::tools(){
 
   mkdir -p "$location"
   docker rm -f dubo-tools 2>/dev/null || true
-  docker run --pull always --name dubo-tools "$IMAGE_TOOLS" /boot/bin/cue >/dev/null 2>&1 || true
+  docker run -d --pull always --name dubo-tools --entrypoint sleep "$IMAGE_TOOLS" inf > /dev/null
   docker cp dubo-tools:/boot/bin/cue "$location"
   docker cp dubo-tools:/boot/bin/buildctl "$location"
-  docker cp dubo-tools:/boot/bin/docker "$location"
   docker rm -f dubo-tools 2>/dev/null || true
 }
 
@@ -39,7 +38,7 @@ command -v shellcheck >/dev/null || {
 
 setup::buildkit(){
   [ "$(docker container inspect -f '{{.State.Running}}' dbdbdp-buildkit 2>/dev/null)" == "true" ]  || \
-    docker run --pull always --rm -d \
+    docker run --pull always -d \
       -p 4242:4242 \
       --network host \
       --name dbdbdp-buildkit \

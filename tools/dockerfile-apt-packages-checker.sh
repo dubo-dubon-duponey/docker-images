@@ -2,7 +2,7 @@
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 SUITE=bookworm
-DATE="${DATE:-2024-03-01}"
+DATE="${DATE:-2025-05-01}"
 dock="$1"
 
 echo "Starting processing of dockerfile $dock"
